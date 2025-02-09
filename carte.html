@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carte</title>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+        .mapboxgl-ctrl-logo {
+            display: none !important;
+        }
+        .map-overlay-2 {
+            position: absolute;
+            top: 10px;
+            right: 50px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            z-index: 1;
+        }
+        .map-overlay-inner {
+            padding: 10px;
+        }
+        .categoryLabel {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        fieldset {
+            border: none;
+            padding: 0;
+            margin: 0;
+        }
+        .map-overlay-2 input[type="checkbox"] {
+            margin-right: 5px;
+        }
+        .map-overlay-2 label {
+            color: #333;
+            margin-bottom: 5px;
+            display: inline-block;
+        }
+        .map-overlay-2 div {
+            margin-bottom: 8px;
+        }
+        .map-legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .legend-item {
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            border: 1px solid #ccc;
+        }
+        h4 {
+            margin: 0 0 10px 0;
+        }
+        .mapboxgl-popup {
+            max-width: 200px;
+        }
+        .mapboxgl-popup-content {
+            padding: 15px;
+            text-align: center;
+        }
+        .popup-image {
+            max-width: 200px;
+            max-height: 200px;
+            width: 200px;
+            height: auto;
+            display: block;
+            margin: 10px auto;
+            border-radius: 4px;
+        }
+        .legend-marker {
+            width: 20px;
+            height: 20px;
+            margin-right: 50px;
+        }
+        /* Style pour les coordonnées de la souris */
+        #coordinates {
+            position: absolute;
+            bottom: 30px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            z-index: 1;
+        }
+        /* Style pour l'échelle */
+        .mapboxgl-ctrl-bottom-left {
+            left: 250px !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    
+    <!-- Conteneur pour les coordonnées -->
+    <div id="coordinates"></div>
+
+    <!-- Menu de sélection des couches -->
+    <div class="map-overlay-2 top">
+        <div class="map-overlay-inner">
+            <span class="categoryLabel">Couches</span>
+            <fieldset>
+                <div>
+                    <input type="checkbox" id="pointsInterets" checked>
+                    <label for="pointsInterets">Points d'intérêts</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="itineraireCB" checked onchange="switchLayer('tripletrack')">
+                    <label for="itineraireCB">Itinéraire</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="courbesCB" checked onchange="switchLayer('contour')">
+                    <label for="courbesCB">Courbes de niveau</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="pentesCB" checked onchange="switchLayer('pentes')">
+                    <label for="pentesCB">Pentes</label>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+
+    <!-- Légende -->
+    <div class="map-legend">
+        <div class="legend-item" id="poiLegend">
+            <div class="legend-marker">
+                <svg height="20" width="20">
+                    <circle cx="10" cy="10" r="6" fill="#33b8ff" stroke="#ffffff" stroke-width="2"/>
+                </svg>
+            </div>
+            <span>Points d'intérêts</span>
+        </div>
+        <div class="legend-item" id="itineraireLegend">
+            <div class="legend-color" style="background: #ee0707; height: 3px;"></div>
+            <span>Itinéraire</span>
+        </div>
+        <div class="legend-item" id="courbesLegend">
+            <div class="legend-color" style="background: #877b59; height: 3px;"></div>
+            <span>Courbes de niveau</span>
+        </div>
+        <div id="pentesLegend">
+            <h4>Pentes</h4>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #e1f29e"></div>
+                <span>Pente faible (&lt;20°)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #fff6b5"></div>
+                <span>Pente moyenne (20-30°)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #fecd86"></div>
+                <span>Pente forte (30-44°)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #f59053"></div>
+                <span>Pente forte (44-58°)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #d7191c"></div>
+                <span>Pente très forte (>58°)</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoiZGFibzIyIiwiYSI6ImNremltNXR2aTMxaG0ydW8xYmcwOGU3YjUifQ.33TjJKovMQpZ1dkC0S9K3Q';
+        
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/satellite-streets-v12',
+            center: [6.507279, 44.334656],
+            zoom: 13,
+            pitch: 60, // Inclinaison pour l'effet 3D
+            bearing: 0
+        });
+
+        map.addControl(new mapboxgl.NavigationControl());
+        map.addControl(new mapboxgl.FullscreenControl());
+
+        // Ajouter la barre d'échelle
+        map.addControl(new mapboxgl.ScaleControl({
+            maxWidth: 100,
+            unit: 'metric'
+        }), 'bottom-left');
+
+        // Afficher les coordonnées de la souris
+        map.on('mousemove', function(e) {
+            const lat = e.lngLat.lat.toFixed(6);
+            const lng = e.lngLat.lng.toFixed(6);
+            document.getElementById('coordinates').innerHTML = `Lat: ${lat} | Lng: ${lng}`;
+        });
+
+        // Fonction pour gérer la visibilité des couches
+        function switchLayer(layerName) {
+            var visibility = map.getLayoutProperty(layerName, 'visibility');
+            var newVisibility = visibility === 'visible' ? 'none' : 'visible';
+            map.setLayoutProperty(layerName, 'visibility', newVisibility);
+
+            // Gérer la visibilité des éléments de légende correspondants
+            if (layerName === 'tripletrack') {
+                document.getElementById('itineraireLegend').style.display = newVisibility === 'visible' ? 'flex' : 'none';
+            } else if (layerName === 'contour') {
+                document.getElementById('courbesLegend').style.display = newVisibility === 'visible' ? 'flex' : 'none';
+            } else if (layerName === 'pentes') {
+                document.getElementById('pentesLegend').style.display = newVisibility === 'visible' ? 'block' : 'none';
+            }
+        }
+
+        map.on('load', () => {
+            // Ajouter le terrain 3D
+            map.addSource('mapbox-dem', {
+                'type': 'raster-dem',
+                'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
+                'tileSize': 512,
+                'maxzoom': 14
+            });
+            
+            // Configurer le terrain
+            map.setTerrain({ 
+                'source': 'mapbox-dem',
+                'exaggeration': 1.5 // Exagération du relief
+            });
+
+            // Ajouter la source raster des pentes
+            map.addSource('pentes', {
+                'type': 'raster',
+                'url': 'mapbox://dabo22.50nvd45p'
+            });
+
+            // Ajouter la couche raster des pentes
+            map.addLayer({
+                'id': 'pentes',
+                'type': 'raster',
+                'source': 'pentes',
+                'paint': {
+                    'raster-opacity': 1
+                },
+                'layout': {
+                    'visibility': 'visible'
+                }
+            });
+
+            // Ajouter la source des itinéraires
+            map.addSource('tripletrack', {
+                type: 'vector',
+                url: 'mapbox://dabo22.dlu2lh04'
+            });
+
+            // Ajouter la couche des itinéraires
+            map.addLayer({
+                'id': 'tripletrack',
+                'type': 'line',
+                'source': 'tripletrack',
+                'source-layer': 'tripletrack-4cez46',
+                'paint': {
+                    'line-width': 4,
+                    'line-color': '#FF0000',
+                    'line-opacity': 0.8
+                },
+                'layout': {
+                    'visibility': 'visible',
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                }
+            });
+
+            // Ajouter les courbes de niveau
+            map.addSource('contours', {
+                type: 'vector',
+                url: 'mapbox://mapbox.mapbox-terrain-v2'
+            });
+
+            map.addLayer({
+                'id': 'contour',
+                'type': 'line',
+                'source': 'contours',
+                'source-layer': 'contour',
+                'layout': {
+                    'visibility': 'visible',
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                'paint': {
+                    'line-color': '#877b59',
+                    'line-width': 1
+                }
+            });
+
+            // Ajouter un événement pour détecter les erreurs de chargement
+            map.on('error', (e) => {
+                console.error('Erreur Mapbox:', e.error);
+            });
+
+            // Gestion des points d'intérêts
+            let markers = [];
+            
+            // Créer les marqueurs
+            var pointsOfInterest = [
+                {
+                    name: "Point 1",
+                    description: "Point de départ (Gite du Laverq).",
+                    image: "images/chalet.JPG", // Image du point 1
+                    coordinates: [6.50248, 44.34911]  // Coordonnées du point 1
+                },
+                {
+                    name: "Point 2",
+                    description: "L'Abbaye de Laverq.",
+                    image: "images/abbaye.jpg", // Image du point 2
+                    coordinates: [6.50540, 44.34918]  // Coordonnées du point 2
+                },
+                {
+                    name: "Point 3",
+                    description: "Passage de la rivière (Blanche de Laverq).",
+                    image: "images/riviere.jpg", // Image du point 1
+                    coordinates: [6.51441, 44.33907]  // Coordonnées du point 1
+                },
+                {
+                    name: "Point 4",
+                    description: "Passage en forêt.",
+                    image: "images/foret.JPG", // Image du point 1
+                    coordinates: [6.50982, 44.33839]  // Coordonnées du point 1
+                },
+                {
+                    name: "Point 5",
+                    description: "Un kilomètre à pied....",
+                    image: "images/en_route.JPG", // Image du point 1
+                    coordinates: [6.50925, 44.33454]  // Coordonnées du point 1
+                },
+                {
+                    name: "Point 6",
+                    description: "Plan de Gautier.",
+                    image: "images/plan.jpg", // Image du point 1
+                    coordinates: [6.51021, 44.32945]  // Coordonnées du point 1
+                },
+                {
+                    name: "Point 7",
+                    description: "Passage à risque.",
+                    image: "images/passage_risque.png", // Image du point 1
+                    coordinates: [6.50645, 44.32487]  // Coordonnées du point 1
+                },
+                {
+                    name: "Point 8",
+                    description: "Pique nique au col.",
+                    image: "images/sommet.JPG", // Image du point 1
+                    coordinates: [6.49892, 44.32115]  // Coordonnées du point 1
+                },
+                // Ajoutez autant de points que nécessaire
+            ];
+
+            pointsOfInterest.forEach(function(point) {
+                var popup = new mapboxgl.Popup({ closeButton: true, closeOnClick: true });
+
+                // Définir le contenu du popup, avec l'image associée au point
+                const popupContent = `
+                    <strong>${point.name}</strong>
+                    <br/>${point.description}
+                    <br/><img src="${point.image}" alt="Image de ${point.name}" class="popup-image" style="max-width: 150px; max-height: 150px; width: auto; height: auto; margin: 10px auto; display: block;"/>
+                `;
+
+                popup.setHTML(popupContent);
+
+                // Ajouter un marqueur et l'associer au popup
+                const marker = new mapboxgl.Marker()
+                    .setLngLat(point.coordinates)
+                    .setPopup(popup)  // Lier le popup au marqueur
+                    .addTo(map);
+                markers.push(marker);
+            });
+
+            // Gestion de la visibilité des points d'intérêt
+            document.getElementById('pointsInterets').addEventListener('change', (e) => {
+                const visibility = e.target.checked;
+                markers.forEach(marker => {
+                    if (visibility) {
+                        marker.addTo(map);
+                    } else {
+                        marker.remove();
+                    }
+                });
+                document.getElementById('poiLegend').style.display = visibility ? 'flex' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

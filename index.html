@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sortie dans le Laverq</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="logo-amu">
+            <a href="https://www.univ-amu.fr/" target="_blank">
+                <img src="images/logo_IUT_noir.png" alt="Logo Aix-Marseille Université" class="logo amu">
+            </a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#commande">Thème</a></li>
+                <li><a href="#bulletins">Bulletins Avalanches</a></li>
+                <li><a href="#carte">Notre Carte</a></li>
+                <li><a href="#photos">Photos</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="logo-mapbox">
+            <a href="https://www.mapbox.com/" target="_blank">
+                <img src="images/mapbox_logo_trans.png" alt="Logo Mapbox" class="logo mapbox">
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <section id="accueil">
+            <h1>Thème : me déplacer en montagne en connaissance des risques.</h1>
+            <p>Nous partons en randonnée le 29 janvier 2025 dans le Laverq.
+               Nous avons pour objectif d'arriver jusqu'au col entre la Tête de Balaour et la Tête de Chabrière.
+               Nous allons donc devoir calculer des itinéraires qui partent du gîte du Laverq, en prenant en compte le risque avalanches.
+               Pour cela, nous avons déterminé à partir d'un modèle numérique de terrain les zones de risque avalanches.
+               <br><br>En effet les zones de risque avalanches sont : les pentes de plus de 30°, en essayant même si possible d'éviter les pentes au delà de 20°.
+               Nous avons donc créé une couche raster à partir de RGE Alti 5m qui délimite les zones de pente par leur degrés.
+               Ensuite, nous avons tracé les itinéraires en fonction des zones de pente et avec des scénarios différents : scénario optimiste (risque avalanche le plus faible), pessimiste (risque avalanche un peu plus important), et enfin très pessimiste (risque avalanche le plus important).
+               Enfin, nous avons ajouté les points d'intérêt remarquables de nos itinéraires.
+               <br><br>Nous avons utilisé cette commande pour s'exercer sur MapBox afin d'apprendre à diffuser une carte interactive.
+            </p>
+        </section>
+
+        <section id="bulletins">
+            <h2>Bulletin de Risques Avalanches</h2>
+            <div class="bulletins-container">
+                <div class="pdf-buttons">
+                    <a href="images/BRAJEU30.pdf" target="_blank" class="pdf-button">
+                        <span class="pdf-icon">📄</span>
+                        Bulletin du 30 Janvier
+                    </a>
+                    <a href="images/BRAVEN31.pdf" target="_blank" class="pdf-button">
+                        <span class="pdf-icon">📄</span>
+                        Bulletin du 31 Janvier
+                    </a>
+                </div>
+
+                <h3>Vidéos Radar</h3>
+                <div class="video-slider">
+                    <div class="video-item">
+                        <video controls>
+                            <source src="images/radar30.mp4" type="video/mp4">
+                            Votre navigateur ne supporte pas la lecture de vidéos.
+                        </video>
+                        <div class="video-caption">Radar du 30 Janvier</div>
+                    </div>
+                    <div class="video-item">
+                        <video controls>
+                            <source src="images/radar31.mp4" type="video/mp4">
+                            Votre navigateur ne supporte pas la lecture de vidéos.
+                        </video>
+                        <div class="video-caption">Radar du 31 Janvier</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="carte">
+            <h2>Carte interactive : l'itinéraire que nous avons emprunté.</h2>
+            <div class="carte-container">
+                <iframe src="carte.html" frameborder="0"></iframe>
+            </div>
+        </section>
+
+        <section id="photos">
+            <h2>  Photos de la Randonnée</h2>
+            <div class="photo-slider">
+                <div class="photo-item">
+                    <img src="images/chalet.JPG" alt="Départ au chalet">
+                    <div class="photo-caption">Départ au chalet</div>
+                </div>
+                <div class="photo-item">
+                    <img src="images/en_route.JPG" alt="En chemin">
+                    <div class="photo-caption">En route vers le sommet</div>
+                </div>
+                <div class="photo-item">
+                    <img src="images/abbaye.jpg" alt="Point remarquable">
+                    <div class="photo-caption">Abbaye de Laverq</div>
+                </div>
+                <div class="photo-item">
+                    <img src="images/sommet.JPG" alt="Vue du sommet">
+                    <div class="photo-caption">Repas au col avant de redescendre</div>
+                </div>
+            </div>
+
+            <div class="video-container">
+                <video controls>
+                    <source src="images/passage_risque.mp4" type="video/mp4">
+                    Votre navigateur ne supporte pas la lecture de vidéos.
+                </video>
+                <div class="video-caption">
+                    Passage dans un endroit à risques !
+                </div>
+            </div>
+        </section>
+
+        <section id="contact">
+            <h2>Contactez-nous</h2>
+            <div class="contact-info">
+                <p> 19 Bd Saint-Jean-Chysostome</p>
+                <p> Université Aix-Marseille, IUT de Digne les Bains</p>
+                <p> Licence professionnelle SIG</p>
+                <p> Coordinatrice de formation : ALINAT Sandrine</p>
+                <p> sandrine.alinat@univ-amu.fr</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 - MARC Thibault and MIVIELLE Evan Jr.</p>
+    </footer>
+</body>
+</html>
